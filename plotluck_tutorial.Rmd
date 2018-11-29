@@ -26,7 +26,7 @@ The vadeer dataset contains the Virginia deer harvest data for four counties (Be
 
 ```{r}
 
-vadeer <- read.csv("~/vadeer_selectcounties.csv",
+vadeer <- read.csv("vadeer_selectcounties.csv",
                    header=T)
 
 head(vadeer)
