@@ -1,0 +1,189 @@
+---
+title: 'Plotluck: A Tutorial'
+output:
+  slidy_presentation: default
+  pdf_document: default
+date: "November 29, 2018"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(plotluck)
+```
+
+### What is plotluck?
+
+In the simplest terms, plotluck is essentially an "I'm feeling lucky" function for ggplot2, the popular R plotting package.
+
+Plotluck allows the user to input what data to plot, while plotluck decides how to plot it, eliminating the need to identify each plot element.
+
+
+### Data
+Let's start with some data.
+
+The vadeer dataset contains the Virginia deer harvest data for four counties (Bedford, Fauquier, Loundoun, and Southampton) in VA, by year (1947-2017).
+
+```{r}
+
+vadeer <- read.csv("~/vadeer_selectcounties.csv",
+                   header=T)
+
+head(vadeer)
+attach(vadeer)
+
+```
+
+### Intro to plotluck
+
+When using ggplot2, the user must indicate how to represent the data, the plot type, and other aesthetic properties.
+
+Plotluck can decide this for us! Plotluck allows the user to focus on what to plot and automates how ggplot2 requires much more user input in regards to the how.
+
+Usage: plotluck(data, formula, weights, opts = plotluck.options(),...)
+
+#### Simple Plotting
+
+We can use plotluck to quickly examine our variables without knowing any information about the variables. Using a "." indicates we are interested in all variables.
+
+```{r}
+
+plotluck(vadeer, .~1)
+
+```
+
+This provides distribution information about each variable.
+We can see that county is a categorical variable, and we can see the distributions for the quantitative variables.
+
+### Options
+
+We can examine the options available in plotluck. verbose = FALSE is the default setting, by switching to TRUE will print the options used by plotluck.
+
+```{r}
+
+opts <- plotluck.options(verbose = TRUE)
+
+```
+
+Say we want to examine the exploratory variables that describe Total Deer Harvest. By setting opts = opts, plotluck will print the options it uses in the plot.
+
+```{r}
+
+plotluck(vadeer, TotalHarvest~., opts=opts)
+
+```
+
+The printout shows calculated conditional entropies, which are used to order the plot - lower values indicate a higher significance in the model. 
+
+***
+
+To explore each plot individually, simply replace "." with the variable of interest. We can also define weights to include more information about the data.
+
+```{r}
+
+plotluck(vadeer, TotalHarvest~Year, opts=opts)
+plotluck(vadeer, TotalHarvest~Year, weights = Females, opts=opts)
+
+```
+
+***
+
+```{r}
+plotluck(vadeer, TotalHarvest~County, opts=opts)
+plotluck(vadeer, TotalHarvest~County, weights = Females, opts=opts)
+```
+
+***
+
+```{r}
+plotluck(vadeer, TotalHarvest~Females+Year, opts=opts)
+plotluck(vadeer, TotalHarvest~Females+Year, weights = ProportionFemale, opts=opts)
+```
+
+***
+We can also produce random visualizations from a dataset.
+
+```{r}
+
+sample.plotluck(vadeer, opts=opts)
+sample.plotluck(vadeer, weights = Females, opts=opts)
+sample.plotluck(vadeer, weights = Year, opts=opts)
+
+```
+
+### Plotluck and ggplot2
+
+Let's start with a simple example.
+
+Let's plot the relationship between the number of females harvested and the number of antlered males harvested, by county.
+
+```{r}
+
+plotluck(vadeer, AntleredMales~Females|County)
+
+```
+
+***
+
+Plotluck stores the mapping information it uses to construct the plot. This information can be used in the ggplot function to recreate the plot. Let's examine some of the information plotluck provides about its options.
+
+```{r}
+
+p <- plotluck(vadeer, AntleredMales~Females|County)
+
+# Aesthetic options
+p$mapping
+
+# Map Layers options
+p$layers
+
+# Plot options
+p$theme
+
+# Plot labels
+p$labels
+
+```
+
+***
+
+Let's use the basic information needed to recreate the information using ggplot.
+This requires more effort on the user's part, but this demonstrates plotluck's use of the ggplot options.
+```{r}
+
+p <- ggplot( vadeer,
+             mapping = aes(x=Females, y=AntleredMales))
+p <- p + geom_point(stat = "identity") 
+p <- p + geom_smooth()
+p <- p + facet_wrap(~County)
+p
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
